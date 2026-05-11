@@ -14,7 +14,16 @@ if ! git diff --cached --name-only | grep -q "QUEST_PROGRESS.md"; then
     echo "⚠️ WARNING: QUEST_PROGRESS.md not staged. Did you record this quest's steps?"
 fi
 
-# 3. Run Mithril Armor scan
+# 3. Run Lint (Ruff + mypy + pytest)
+if [ -f scripts/lint.sh ]; then
+    bash scripts/lint.sh
+    if [ $? -ne 0 ]; then
+        echo "❌ Lint failed. Fix errors before passing the Gates."
+        exit 1
+    fi
+fi
+
+# 4. Run Mithril Armor scan
 if [ -f scripts/mithril-armor.py ]; then
     python3 scripts/mithril-armor.py
     if [ $? -ne 0 ]; then
@@ -23,7 +32,7 @@ if [ -f scripts/mithril-armor.py ]; then
     fi
 fi
 
-# 4. Check Archive freshness
+# 5. Check Archive freshness
 if [ -d docs/archive ]; then
     CODE_CHANGED=$(git diff --cached --name-only | grep -E "\.(py|js|ts|vue|tsx|jsx)$")
     ARCHIVE_CHANGED=$(git diff --cached --name-only | grep "docs/archive/")
